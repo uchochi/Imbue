@@ -1,11 +1,25 @@
 import { createServer } from 'node:http';
-import { readFileSync, writeFileSync, existsSync } from 'node:fs';
-import { join, dirname } from 'node:path';
+import { readFileSync, writeFileSync, existsSync, statSync } from 'node:fs';
+import { join, dirname, extname } from 'node:path';
 import { fileURLToPath } from 'node:url';
 
 const __dirname = dirname(fileURLToPath(import.meta.url));
 const DATA_FILE = join(__dirname, 'data', 'jobs.json');
+const DIST = join(__dirname, '..', 'dist');
 const PORT = process.env.PORT || 3001;
+
+const MIME = {
+  '.html': 'text/html; charset=utf-8',
+  '.js': 'application/javascript',
+  '.css': 'text/css',
+  '.json': 'application/json',
+  '.png': 'image/png',
+  '.jpg': 'image/jpeg',
+  '.svg': 'image/svg+xml',
+  '.ico': 'image/x-icon',
+  '.woff': 'font/woff',
+  '.woff2': 'font/woff2',
+};
 
 const SEED = [
   {
@@ -112,12 +126,36 @@ function readBody(req) {
   });
 }
 
+function serveStatic(res, urlPath) {
+  const filePath = join(DIST, urlPath);
+  if (existsSync(filePath) && statSync(filePath).isFile()) {
+    const ext = extname(filePath);
+    res.writeHead(200, { 'Content-Type': MIME[ext] || 'application/octet-stream' });
+    res.end(readFileSync(filePath));
+    return true;
+  }
+  return false;
+}
+
+function serveSPA(res) {
+  const indexPath = join(DIST, 'index.html');
+  if (existsSync(indexPath)) {
+    res.writeHead(200, { 'Content-Type': 'text/html; charset=utf-8' });
+    res.end(readFileSync(indexPath));
+  } else {
+    res.writeHead(500, { 'Content-Type': 'text/plain' });
+    res.end('Build not found. Run "npm run build" first.');
+  }
+}
+
 const server = createServer(async (req, res) => {
   const { method, url } = req;
   const path = url.split('?')[0];
 
-  if (method === 'OPTIONS') return sendJson(res, 204, null);
+  // CORS preflight
+  if (method === 'OPTIONS') { res.writeHead(204); return res.end(); }
 
+  // --- API routes ---
   if (path === '/api/jobs' && method === 'GET') {
     return sendJson(res, 200, loadJobs());
   }
@@ -126,12 +164,7 @@ const server = createServer(async (req, res) => {
     const data = await readBody(req);
     const jobs = loadJobs();
     const now = new Date().toISOString();
-    const job = {
-      ...data,
-      id: Date.now().toString(36) + Math.random().toString(36).slice(2, 9),
-      createdAt: now,
-      updatedAt: now,
-    };
+    const job = { ...data, id: Date.now().toString(36) + Math.random().toString(36).slice(2, 9), createdAt: now, updatedAt: now };
     jobs.unshift(job);
     saveJobs(jobs);
     return sendJson(res, 201, job);
@@ -159,9 +192,13 @@ const server = createServer(async (req, res) => {
     return sendJson(res, 200, { ok: true });
   }
 
-  sendJson(res, 404, { error: 'Not found' });
+  // --- Static files from dist/ ---
+  if (path !== '/' && serveStatic(res, path)) return;
+
+  // --- SPA fallback ---
+  serveSPA(res);
 });
 
 server.listen(PORT, () => {
-  console.log(`API server running on http://localhost:${PORT}`);
+  console.log(`Server running on http://localhost:${PORT}`);
 });
