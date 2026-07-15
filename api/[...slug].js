@@ -1,4 +1,4 @@
-const SEED = [
+let jobs = [
   {
     id: '1', title: 'Machine Learning Engineer', department: 'Engineering', location: 'Remote',
     type: 'full-time', salaryRange: '$150k - $220k',
@@ -73,31 +73,59 @@ const SEED = [
   }
 ];
 
-let jobs = [...SEED];
+function json(res, status, data) {
+  res.setHeader('Content-Type', 'application/json');
+  res.setHeader('Access-Control-Allow-Origin', '*');
+  res.setHeader('Access-Control-Allow-Methods', 'GET, POST, PUT, DELETE, OPTIONS');
+  res.setHeader('Access-Control-Allow-Headers', 'Content-Type');
+  return res.status(status).json(data);
+}
 
 export default function handler(req, res) {
-  res.setHeader('Access-Control-Allow-Origin', '*');
-  res.setHeader('Access-Control-Allow-Methods', 'GET, POST, OPTIONS');
-  res.setHeader('Access-Control-Allow-Headers', 'Content-Type');
-
   if (req.method === 'OPTIONS') {
+    res.setHeader('Access-Control-Allow-Origin', '*');
+    res.setHeader('Access-Control-Allow-Methods', 'GET, POST, PUT, DELETE, OPTIONS');
+    res.setHeader('Access-Control-Allow-Headers', 'Content-Type');
     return res.status(204).end();
   }
 
-  if (req.method === 'GET') {
-    return res.status(200).json(jobs);
+  const slug = req.query.slug || [];
+  const id = slug[0] || null;
+
+  if (!id) {
+    if (req.method === 'GET') return json(res, 200, jobs);
+    if (req.method === 'POST') {
+      const now = new Date().toISOString();
+      const job = {
+        ...req.body,
+        id: Date.now().toString(36) + Math.random().toString(36).slice(2, 9),
+        createdAt: now,
+        updatedAt: now,
+      };
+      jobs.unshift(job);
+      return json(res, 201, job);
+    }
+    return res.status(405).json({ error: 'Method not allowed' });
   }
 
-  if (req.method === 'POST') {
-    const now = new Date().toISOString();
-    const job = {
-      ...req.body,
-      id: Date.now().toString(36) + Math.random().toString(36).slice(2, 9),
-      createdAt: now,
-      updatedAt: now,
-    };
-    jobs.unshift(job);
-    return res.status(201).json(job);
+  if (req.method === 'GET') {
+    const job = jobs.find((j) => j.id === id);
+    if (!job) return json(res, 404, { error: 'Not found' });
+    return json(res, 200, job);
+  }
+
+  if (req.method === 'PUT') {
+    const idx = jobs.findIndex((j) => j.id === id);
+    if (idx === -1) return json(res, 404, { error: 'Not found' });
+    jobs[idx] = { ...jobs[idx], ...req.body, updatedAt: new Date().toISOString() };
+    return json(res, 200, jobs[idx]);
+  }
+
+  if (req.method === 'DELETE') {
+    const idx = jobs.findIndex((j) => j.id === id);
+    if (idx === -1) return json(res, 404, { error: 'Not found' });
+    jobs.splice(idx, 1);
+    return json(res, 200, { ok: true });
   }
 
   return res.status(405).json({ error: 'Method not allowed' });
