@@ -93,6 +93,16 @@ const SEED = [
     responsibilities: ['Write and maintain API documentation', 'Create tutorials and getting-started guides', 'Work with engineers to document new features', 'Improve documentation structure and discoverability', 'Gather feedback from developer community'],
     howToApply: 'Email careers@loseyourip.com with your writing samples. Subject: "Technical Writer Application".',
     applyLink: '', status: 'open', createdAt: '2026-07-08T10:00:00Z', updatedAt: '2026-07-08T10:00:00Z'
+  },
+  {
+    id: '9', title: 'Local Language AI Contributor', department: 'Research', location: 'Remote',
+    type: 'full-time', salaryRange: 'Competitive pay',
+    description: 'We are recruiting 8,000 individuals for a massive project to help Artificial Intelligence truly understand local languages. Most AI models today struggle with the nuances of dialects, correct pronunciation, and local humor. Our mission is to build a high-quality knowledge base that teaches AI how to communicate naturally including how translate and transcribe across various fields. As a contributor, you will help bridge the gap between technology and local culture. No prior experience is required; we provide all the necessary training to teach you how to gather and format data effectively. This is your chance to be part of a historic movement to humanize AI while earning competitive pay for your local expertise.',
+    responsibilities: ['Data Gathering: Collect local vocabulary, proverbs, and industry-specific terms (e.g., healthcare, farming, or tech)', 'Phonetics & Humor: Document local pronunciations, accents, and the nuances of regional humor/sarcasm', 'AI Formatting: Organize raw language into structured data sets that AI models can process', 'Mandatory Training: Join our WhatsApp Training Channel for step-by-step guides and live tutorials'],
+    requirements: ['Native Fluency: A "street-level" mastery of your local language, including formal and informal dialects', 'Cultural Insight: A strong understanding of local jokes, social norms, and cultural references', 'Willingness to Learn: You must be able to strictly follow our formatting guidelines after completing the training', 'Attention to Detail: Precision in spelling and pronunciation documentation is critical', 'Basic Tech Skills: Comfort with typing, saving files, and uploading documents'],
+    howToApply: 'Skip the resume! Join our Official Training Section on our WhatsApp Channel to start learning and earning immediately.',
+    applyLink: 'https://whatsapp.com/channel/0029VbDKf3G9Gv7S3Dm9Cv0m',
+    status: 'open', createdAt: '2026-07-15T10:00:00Z', updatedAt: '2026-07-15T10:00:00Z'
   }
 ];
 
