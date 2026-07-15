@@ -1,4 +1,8 @@
-let jobs = [
+import { kv } from '@vercel/kv';
+
+const KV_KEY = 'jobs';
+
+const SEED = [
   {
     id: '1', title: 'Machine Learning Engineer', department: 'Engineering', location: 'Remote',
     type: 'full-time', salaryRange: '$150k - $220k',
@@ -73,6 +77,19 @@ let jobs = [
   }
 ];
 
+async function getJobs() {
+  const stored = await kv.get(KV_KEY);
+  if (!stored || !Array.isArray(stored) || stored.length === 0) {
+    await kv.set(KV_KEY, SEED);
+    return SEED;
+  }
+  return stored;
+}
+
+async function saveJobs(jobs) {
+  await kv.set(KV_KEY, jobs);
+}
+
 function json(res, status, data) {
   res.setHeader('Content-Type', 'application/json');
   res.setHeader('Access-Control-Allow-Origin', '*');
@@ -81,7 +98,7 @@ function json(res, status, data) {
   return res.status(status).json(data);
 }
 
-export default function handler(req, res) {
+export default async function handler(req, res) {
   if (req.method === 'OPTIONS') {
     res.setHeader('Access-Control-Allow-Origin', '*');
     res.setHeader('Access-Control-Allow-Methods', 'GET, POST, PUT, DELETE, OPTIONS');
@@ -93,8 +110,12 @@ export default function handler(req, res) {
   const id = slug.length > 1 ? slug[1] : null;
 
   if (!id) {
-    if (req.method === 'GET') return json(res, 200, jobs);
+    if (req.method === 'GET') {
+      const jobs = await getJobs();
+      return json(res, 200, jobs);
+    }
     if (req.method === 'POST') {
+      const jobs = await getJobs();
       const now = new Date().toISOString();
       const job = {
         ...req.body,
@@ -103,10 +124,13 @@ export default function handler(req, res) {
         updatedAt: now,
       };
       jobs.unshift(job);
+      await saveJobs(jobs);
       return json(res, 201, job);
     }
     return res.status(405).json({ error: 'Method not allowed' });
   }
+
+  const jobs = await getJobs();
 
   if (req.method === 'GET') {
     const job = jobs.find((j) => j.id === id);
@@ -118,6 +142,7 @@ export default function handler(req, res) {
     const idx = jobs.findIndex((j) => j.id === id);
     if (idx === -1) return json(res, 404, { error: 'Not found' });
     jobs[idx] = { ...jobs[idx], ...req.body, updatedAt: new Date().toISOString() };
+    await saveJobs(jobs);
     return json(res, 200, jobs[idx]);
   }
 
@@ -125,6 +150,7 @@ export default function handler(req, res) {
     const idx = jobs.findIndex((j) => j.id === id);
     if (idx === -1) return json(res, 404, { error: 'Not found' });
     jobs.splice(idx, 1);
+    await saveJobs(jobs);
     return json(res, 200, { ok: true });
   }
 
