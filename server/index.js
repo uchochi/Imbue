@@ -153,7 +153,14 @@ const server = createServer(async (req, res) => {
   const path = url.split('?')[0];
 
   // CORS preflight
-  if (method === 'OPTIONS') { res.writeHead(204); return res.end(); }
+  if (method === 'OPTIONS') {
+    res.writeHead(204, {
+      'Access-Control-Allow-Origin': '*',
+      'Access-Control-Allow-Methods': 'GET, POST, PUT, DELETE, OPTIONS',
+      'Access-Control-Allow-Headers': 'Content-Type',
+    });
+    return res.end();
+  }
 
   // --- API routes ---
   if (path === '/api/jobs' && method === 'GET') {

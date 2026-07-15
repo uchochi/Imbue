@@ -19,7 +19,7 @@ export default function JobDetailPage() {
   if (!job) return <Navigate to="/jobs" replace />;
 
   return (
-    <div className="w-full px-6 py-12">
+    <div className="mx-auto max-w-6xl px-6 py-12">
       <JobDetail job={job} />
     </div>
   );
