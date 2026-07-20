@@ -40,7 +40,7 @@ export default function SignupPage() {
         id: data.user.id,
         email: data.user.email,
         name: name,
-        role: 'user',
+        role: 'apprentice',
       });
       if (insertError) console.error('Failed to create user profile:', insertError);
     }

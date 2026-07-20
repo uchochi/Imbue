@@ -13,7 +13,9 @@ import SignupPage from './pages/admin/SignupPage';
 import DashboardPage from './pages/admin/DashboardPage';
 import CreateJobPage from './pages/admin/CreateJobPage';
 import EditJobPage from './pages/admin/EditJobPage';
+import UserDashboardPage from './pages/UserDashboardPage';
 import ProtectedAdminRoute from './components/admin/ProtectedAdminRoute';
+import ProtectedUserRoute from './components/ProtectedUserRoute';
 
 export default function App() {
   return (
@@ -29,6 +31,10 @@ export default function App() {
             <Route path="/forum/new" element={<NewTopicPage />} />
             <Route path="/admin/login" element={<LoginPage />} />
             <Route path="/admin/signup" element={<SignupPage />} />
+            <Route
+              path="/dashboard"
+              element={<ProtectedUserRoute><UserDashboardPage /></ProtectedUserRoute>}
+            />
             <Route
               path="/admin"
               element={<ProtectedAdminRoute><DashboardPage /></ProtectedAdminRoute>}

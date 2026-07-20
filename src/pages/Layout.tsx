@@ -8,7 +8,7 @@ import Button from '../components/ui/Button';
 export default function Layout({ children }: { children: ReactNode }) {
   const [mobileOpen, setMobileOpen] = useState(false);
   const { pathname } = useLocation();
-  const { isAuthenticated, logout } = useAuth();
+  const { isAuthenticated, user, logout } = useAuth();
 
   const links = [
     { to: '/', label: 'Home' },
@@ -16,7 +16,9 @@ export default function Layout({ children }: { children: ReactNode }) {
     { to: '/forum', label: 'Forum' },
   ];
 
-  const isAdmin = (isAuthenticated) || (typeof window !== 'undefined' && sessionStorage.getItem('loseyourip_admin'));
+  const legacyAdmin = typeof window !== 'undefined' && sessionStorage.getItem('loseyourip_admin');
+  const isAdmin = (user?.role === 'admin') || legacyAdmin;
+  const showUserDashboard = isAuthenticated && !isAdmin;
 
   return (
     <div className="min-h-screen flex flex-col bg-white">
@@ -48,6 +50,16 @@ export default function Layout({ children }: { children: ReactNode }) {
                 Dashboard
               </Link>
             )}
+            {showUserDashboard && (
+              <Link
+                to="/dashboard"
+                className={`rounded-lg px-4 py-2 text-sm font-medium no-underline transition-colors ${
+                  pathname === '/dashboard' ? 'bg-primary/10 text-primary' : 'text-slate-600 hover:bg-slate-100'
+                }`}
+              >
+                My Dashboard
+              </Link>
+            )}
             {isAuthenticated ? (
               <Button variant="ghost" size="sm" onClick={logout}>Logout</Button>
             ) : (
@@ -63,7 +75,13 @@ export default function Layout({ children }: { children: ReactNode }) {
         {mobileOpen && (
           <div className="border-t border-slate-200 bg-white px-6 py-4 md:hidden">
             <div className="flex flex-col gap-1">
-              {links.concat(isAdmin ? [{ to: '/admin', label: 'Dashboard' }] : []).concat(
+              {links.concat(
+                isAdmin
+                  ? [{ to: '/admin', label: 'Dashboard' }]
+                  : showUserDashboard
+                    ? [{ to: '/dashboard', label: 'My Dashboard' }]
+                    : []
+              ).concat(
                 isAuthenticated
                   ? [{ to: '#', label: 'Logout' }]
                   : [{ to: '/admin/login', label: 'Sign In' }]

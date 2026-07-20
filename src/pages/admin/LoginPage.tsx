@@ -1,18 +1,21 @@
 import { useState, type FormEvent } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { useAuth } from '../../context/AuthContext';
+import { supabase } from '../../lib/supabase';
 import Button from '../../components/ui/Button';
 import Input from '../../components/ui/Input';
 
 export default function LoginPage() {
-  const { isAuthenticated, login } = useAuth();
+  const { isAuthenticated, login, user } = useAuth();
   const navigate = useNavigate();
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [error, setError] = useState('');
 
+  const homeForRole = (role?: string) => (role === 'admin' ? '/admin' : '/dashboard');
+
   if (isAuthenticated) {
-    navigate('/admin', { replace: true });
+    navigate(homeForRole(user?.role), { replace: true });
     return null;
   }
 
@@ -25,7 +28,9 @@ export default function LoginPage() {
     }
     const ok = await login(email, password);
     if (ok) {
-      navigate('/admin', { replace: true });
+      const { data } = await supabase.auth.getUser();
+      const role = data.user?.app_metadata?.role as string | undefined;
+      navigate(homeForRole(role), { replace: true });
     } else {
       setError('Invalid credentials');
     }
