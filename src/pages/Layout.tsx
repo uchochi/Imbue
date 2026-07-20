@@ -4,6 +4,7 @@ import { Menu, X } from 'lucide-react';
 import { useState } from 'react';
 import { useAuth } from '../context/AuthContext';
 import Button from '../components/ui/Button';
+import Footer from '../components/Footer';
 
 export default function Layout({ children }: { children: ReactNode }) {
   const [mobileOpen, setMobileOpen] = useState(false);
@@ -112,12 +113,7 @@ export default function Layout({ children }: { children: ReactNode }) {
         )}
       </nav>
       <main className="flex-1">{children}</main>
-      {/* Footer */}
-      <footer className="border-t border-slate-100 bg-slate-50">
-        <div className="mx-auto max-w-6xl px-6 py-8 text-center text-sm text-slate-500">
-          &copy; {new Date().getFullYear()} Loseyourip. All rights reserved.
-        </div>
-      </footer>
+      <Footer />
     </div>
   );
 }
