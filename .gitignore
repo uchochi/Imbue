@@ -23,3 +23,6 @@ server/data/jobs.json
 *.njsproj
 *.sln
 *.sw?
+
+# Local env (publishable anon key is safe but keep local overrides out)
+.env
