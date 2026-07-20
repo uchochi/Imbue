@@ -23,11 +23,13 @@ import EditJobPage from './pages/admin/EditJobPage';
 import UserDashboardPage from './pages/UserDashboardPage';
 import ProtectedAdminRoute from './components/admin/ProtectedAdminRoute';
 import ProtectedUserRoute from './components/ProtectedUserRoute';
+import ScrollToTop from './components/ScrollToTop';
 
 export default function App() {
   return (
     <BrowserRouter>
       <AuthProvider>
+        <ScrollToTop />
         <Layout>
           <Routes>
             <Route path="/" element={<HomePage />} />
